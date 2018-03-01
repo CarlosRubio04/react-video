@@ -5,13 +5,17 @@ import Title from '../components/title';
 import PlayPause from '../components/play-pause';
 import Timer from '../components/timer';
 import Controls from '../components/video-players-controls'; 
-import Progressbar from '../components/progress-bar'
+import Progressbar from '../components/progress-bar';
+import Spiner from '../components/spiner';
+import Volume from '../components/volume';
+import FullScreen from '../components/full-screen';
 
 class VideoPlayer extends Component {
 	state = {
 		pause: true,
 		duration: 0,
 		currentTime: 0,
+		loading: false,
 	}
 	togglePlay = (event) => {
 		this.setState({
@@ -37,11 +41,36 @@ class VideoPlayer extends Component {
 	handleProgressChange = event => {
 		this.video.currentTime = event.target.value
 	}
+	handleSeeking = event => {
+		this.setState({
+			loading: true
+		})
+	}
+	handleSeeked = event => {
+		this.setState({
+			loading: false
+		})
+	}
+	handleVolumeChange = event => {
+		this.video.volume = event.target.value
+	}
+	handleFullScreen = event => {
+		if (!document.webkitIsFullScreen){
+			this.player.webkitRequestFullScreen()
+		}else {
+			document.webkitExitFullscreen()
+		}
+	}
+	setRef = element => {
+		this.player = element
+	}
 	render() {
 		return(
-			<VideoPlayerLayout>
+			<VideoPlayerLayout 
+				setRef={this.setRef}
+			>
 				<Title
-					title="El titulo va aca!"
+					title={this.props.title}
 				/>
 
 				<Controls>
@@ -58,15 +87,28 @@ class VideoPlayer extends Component {
 						value={this.state.currentTime}
 						handleProgressChange={this.handleProgressChange}
 					/>
+					<Volume
+						handleVolumeChange={this.handleVolumeChange}
+					/>
+					<FullScreen
+						handleFullScreen={this.handleFullScreen}
+					/>
 				</Controls>
-	
+				
+
 				
 				<Video 
 					autoplay={this.props.autoplay}
 					pause={this.state.pause}
 					handleLoadedMetadata={this.handleLoadedMetadata}
 					handleTimeUpdate={this.handleTimeUpdate}
-					src="http://peach.themazzone.com/durian/movies/sintel-1024-surround.mp4"
+					cover={this.props.cover}
+					src={this.props.src}
+					handleSeeking={this.handleSeeking}
+					handleSeeked={this.handleSeeked}
+				/>
+				<Spiner
+					active={this.state.loading}
 				/>
 			</VideoPlayerLayout>
 		)
